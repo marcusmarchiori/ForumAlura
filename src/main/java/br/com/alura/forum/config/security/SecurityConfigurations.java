@@ -47,17 +47,19 @@ public class SecurityConfigurations extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.GET, "/topicos").permitAll()
                 .antMatchers(HttpMethod.GET, "/topicos/*").permitAll() // * = Qualquer coisa (no caso, id)
                 .antMatchers(HttpMethod.POST, "/auth").permitAll() // Liberar o acesso para o endpoint
-                .anyRequest().authenticated() // Qualquer outro request, precisa estar autenticado
+                .antMatchers(HttpMethod.GET, "/actuator/**").permitAll() // * = Qualquer coisa/ qualquer coisa
+                .anyRequest().authenticated() // Qualquer outro request (url), precisa estar autenticado
                 /*.and().formLogin();  // Pro Spring gerar um formulario de autenticação*/
                 .and().csrf().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 // Avisa o Spring que quando fizer autenticação, não é pra criar sessão pois usaremos token
                 .and().addFilterBefore(new AutenticacaoViaTokenFilter
-                                        (tokenService, usuarioRepository), UsernamePasswordAuthenticationFilter.class);
+                (tokenService, usuarioRepository), UsernamePasswordAuthenticationFilter.class);
     }
 
     // Configurações de recursos estáticos (requisições para arquivos js, css, imagens...)
     @Override
     public void configure(WebSecurity web) throws Exception {
+        web.ignoring()
+                .antMatchers("/**.html", "/v2/api-docs", "/webjars/**", "/configuration/**", "/swagger-resources/**");
     }
-
 }
