@@ -1,5 +1,6 @@
 package br.com.alura.forum.config.security;
 
+import br.com.alura.forum.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,6 +13,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @EnableWebSecurity
 @Configuration
@@ -19,6 +21,12 @@ public class SecurityConfigurations extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private AutenticacaoService autenticacaoService;
+
+    @Autowired
+    private TokenService tokenService;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
     @Override
     @Bean
@@ -41,8 +49,10 @@ public class SecurityConfigurations extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.POST, "/auth").permitAll() // Liberar o acesso para o endpoint
                 .anyRequest().authenticated() // Qualquer outro request, precisa estar autenticado
                 /*.and().formLogin();  // Pro Spring gerar um formulario de autenticação*/
-                .and().csrf().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+                .and().csrf().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 // Avisa o Spring que quando fizer autenticação, não é pra criar sessão pois usaremos token
+                .and().addFilterBefore(new AutenticacaoViaTokenFilter
+                                        (tokenService, usuarioRepository), UsernamePasswordAuthenticationFilter.class);
     }
 
     // Configurações de recursos estáticos (requisições para arquivos js, css, imagens...)
