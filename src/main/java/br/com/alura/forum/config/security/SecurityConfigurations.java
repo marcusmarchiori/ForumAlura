@@ -48,6 +48,7 @@ public class SecurityConfigurations extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.GET, "/topicos/*").permitAll() // * = Qualquer coisa (no caso, id)
                 .antMatchers(HttpMethod.POST, "/auth").permitAll() // Liberar o acesso para o endpoint
                 .antMatchers(HttpMethod.GET, "/actuator/**").permitAll() // * = Qualquer coisa/ qualquer coisa
+                .antMatchers(HttpMethod.DELETE, "/topicos/*").hasRole("MODERADOR") // Só pode executar a ação quem for do perfil MODERADOR
                 .anyRequest().authenticated() // Qualquer outro request (url), precisa estar autenticado
                 /*.and().formLogin();  // Pro Spring gerar um formulario de autenticação*/
                 .and().csrf().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
